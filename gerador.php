@@ -19,7 +19,7 @@
 	<script type="text/javascript" src="javascript/all.js"></script>
 </head>
 <body>
-	<div id="main">
+	<div id="main" class="content">
 
 		<h1>Gerador de Email Marketing</h1>
 <?php
@@ -42,15 +42,34 @@
 			$file = str_replace( '\"', '"', $_POST['emm'] );
 		}
 
-		if( stripos( $file, 'rowspan') )
+		$file = str_replace( array("\t","\r\n", "\n"), '', $file );
+
+
+
+		$pos_rowspan = stripos( $file, 'rowspan');
+		if( $pos_rowspan )
 		{
-			echo '<p>Nao faca slices com <strong>rowspan</strong></p>';
-			echo $voltar;
+			echo '<h2>Nao faca slices com <strong>rowspan</strong></h2>';
+
+			preg_match_all('/(<td( colspan=\"[0-9]+\")? rowspan=\"[0-9]+\"><img[^>]+><\/td>)/', $file, $pieces);
+
+
+			foreach( $pieces[0] AS $each ){
+				preg_match('/(<img[^>]+>)/', $each, $img);
+				preg_match('/src=\"([^"]+)"/', $img[0], $src);
+
+
+				$arr[] = '<li><p>rowspan encontrado na imagem: </p>
+					<p><strong>'.$src[0].'</strong></p>'.$img[0].'</li>';
+			}
+
+			echo '<ul>'.implode($arr).'</ul>';
+
+			echo '<br><br>'.$voltar;
+			exit();
 		}
 		else
 		{
-
-			$file = str_replace( array("\t","\r\n", "\n"), '', $file );
 
 			$file = preg_replace(
 							array(
@@ -105,34 +124,60 @@
 ?>
 
 		<h2>Preview do EMM:</h2>
-		<div id="preview"><?php echo $out; ?></div>
+		<div id="preview" class="fleft"><?php echo $out; ?></div>
 
-		<h2>Texto a ser inserido:</h2>
-		<label> <textarea name="content" cols="40" rows="10"></textarea></label>
-		<label><span>font:</span> <input type="text" name="font" value="bold 13px/16px Arial, Tahoma, Geneva, sans-serif" /></label>
-		<label><span>color:</span> <input type="text" name="color" value="#000000" /></label>
-		<label><span>bgcolor:</span> <input type="text" name="bgcolor" value="#ffffff" /></label>
-		<label>
-			<span>valign:</span>
-			<select name="valign">
-				<option value="top">top</option>
-				<option value="middle">middle</option>
-				<option value="bottom">bottom</option>
-			</select>
-		</label>
-		<label>
-			<span>align:</span>
-				<select name="align" >
-				<option value="left">left</option>
-				<option value="center">center</option>
-				<option value="right">right</option>
-			</select>
-		</label>
+		<div id="format" class="fleft">
+			<h2>Texto a ser inserido:</h2>
+			<fieldset>
+				<label><textarea name="content" cols="40" rows="10"></textarea></label>
+				<label>
+					<span class="fleft">face:</span>
+					<input type="text" name="face" value="Arial, Tahoma, Geneva, sans-serif" class="fright" />
+				</label>
+				<label>
+					<span class="fleft">font-size:</span>
+					<input type="text" name="size" value="13px" class="fright" />
+				</label>
+				<label>
+					<span class="fleft">font-weight:</span>
+					<input type="text" name="weight" value="normal" class="fright" />
+				</label>
+				<label>
+					<span class="fleft">color:</span>
+					<input type="text" name="color" value="#000000" class="fright" />
+				</label>
+				<label>
+					<span class="fleft">bgcolor:</span>
+					 <input type="text" name="bgcolor" value="#ffffff" class="fright" />
+				</label>
+				<label>
+					<span class="fleft">valign:</span>
+					<select class="fright" name="valign">
+						<option value="top">top</option>
+						<option value="middle">middle</option>
+						<option value="bottom">bottom</option>
+					</select>
+				</label>
+				<label>
+					<span class="fleft">align:</span>
+					<select class="fright" name="align">
+						<option value="left">left</option>
+						<option value="center">center</option>
+						<option value="right">right</option>
+					</select>
+				</label>
+			</fieldset>
+		</div><!-- format -->
+
+		<div id="output" class="content clear">
+			<h2>Codigo HTML parametrizado</h2>
+			<label>
+				<textarea cols="70" rows="20" name="out" class="out" readonly="readonly"><?php echo $out; ?></textarea>
+			</label>
+		</div><!-- #output -->
 
 
-		<h2>Codigo HTML parametrizado</h2>
-		<label>
-		<textarea cols="70" rows="20" name="out" class="out" readonly="readonly"><?php echo $out; ?></textarea></label>
+
 	</div><!-- /main -->
 </body>
 </html>
